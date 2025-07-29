@@ -9,9 +9,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    serverComponentsExternalPackages: ['redis', '@redis/client'],
-  },
+  serverExternalPackages: ['redis', '@redis/client'],
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Completely exclude server-only modules from client bundle
@@ -21,7 +19,7 @@ const nextConfig = {
         'redis': false,
         '@redis/client': false,
       }
-      
+
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,

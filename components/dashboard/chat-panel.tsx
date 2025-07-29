@@ -38,8 +38,9 @@ export function ChatPanel() {
       return
     }
 
-    if (!currentSession) {
-      setError("Please create or select a session first")
+    // Ensure currentSession and its ID exist before proceeding
+    if (!currentSession || !currentSession.id) {
+      setError("Please create or select a session first to start chatting.")
       return
     }
 
@@ -61,7 +62,7 @@ export function ChatPanel() {
         },
         body: JSON.stringify({
           message: userMessage,
-          sessionId: currentSession.id,
+          sessionId: currentSession.id, // Make sure this is correctly named
         }),
       })
 
@@ -164,7 +165,9 @@ export function ChatPanel() {
           </div>
         </div>
 
-        {currentSession && <p className="text-sm text-muted-foreground mt-2">Session: {currentSession.title}</p>}
+        {currentSession && (
+          <p className="text-sm text-muted-foreground mt-2">Session: {currentSession.title || currentSession.id}</p>
+        )}
 
         {error && (
           <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
@@ -206,7 +209,7 @@ export function ChatPanel() {
                       size="sm"
                       className="w-full justify-start text-left h-auto p-3 whitespace-normal hover:bg-accent/50 transition-colors bg-transparent"
                       onClick={() => handleSuggestedPrompt(prompt)}
-                      disabled={isLoading || !currentSession}
+                      disabled={isLoading || !currentSession?.id} // Disable if no session ID
                     >
                       <Sparkles className="h-4 w-4 mr-3 text-green-500 flex-shrink-0" />
                       <span className="text-sm">{prompt}</span>
@@ -282,11 +285,11 @@ export function ChatPanel() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={currentSession ? "Describe your component..." : "Create a session first..."}
-            disabled={isLoading || !currentSession}
+            placeholder={currentSession?.id ? "Describe your component..." : "Create a session first..."}
+            disabled={isLoading || !currentSession?.id} // Disable if no session ID
             className="flex-1 bg-background"
           />
-          <Button type="submit" disabled={isLoading || !input.trim() || !currentSession} className="px-6">
+          <Button type="submit" disabled={isLoading || !input.trim() || !currentSession?.id} className="px-6">
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </form>

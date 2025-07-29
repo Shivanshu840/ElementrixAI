@@ -98,23 +98,30 @@ export async function POST(request: NextRequest) {
     console.log("📁 Session ID:", sessionId)
 
     // 4. Create system prompt
-    const systemPrompt = `You are a React component generator. Always respond with valid JSON in this exact format:
+    const systemPrompt = `You are a React component generator. You must respond with valid JSON in this exact format with NO markdown code blocks:
 
 {
   "message": "Brief description of what you created",
   "component": {
     "name": "ComponentName",
-    "jsxCode": "Complete React component code",
-    "cssCode": "CSS styles",
+    "jsxCode": "Complete React component code as plain text",
+    "cssCode": "CSS styles as plain text",
     "version": 1
   }
 }
 
-Rules:
-- Always return valid JSON (no markdown, no code blocks)
-- Use functional React components with TypeScript
+CRITICAL RULES:
+- Return ONLY valid JSON, no markdown formatting
+- jsxCode must be plain React/TypeScript code without any backticks or markdown
+- cssCode must be plain CSS without any backticks or markdown
+- Use functional React components with proper TypeScript interfaces
 - Make components responsive and accessible
-- If you can't create a component, set component to null`
+- Do not wrap code in \`\`\`typescript or \`\`\`css blocks
+- If you can't create a component, set component to null
+
+Example of correct jsxCode format:
+"jsxCode": "import React, { useState } from 'react';\n\nconst MyComponent = () => {\n  return <div>Hello World</div>;\n};\n\nexport default MyComponent;"
+`
 
     // 5. Call Gemini API
     console.log("🤖 Calling Gemini API...")
@@ -172,19 +179,19 @@ Rules:
     // 8. Save to database if session exists
     if (sessionId && responseData.component) {
       try {
-        const sessionIdNum = Number.parseInt(sessionId)
+        // sessionId is already a string, no conversion needed here based on your schema
         console.log("💾 Saving to database...")
 
         // Save chat messages
         await prisma.chatMessage.createMany({
           data: [
             {
-              sessionId: sessionIdNum,
+              sessionId: sessionId, // Use sessionId directly as a string
               role: "user",
               content: message,
             },
             {
-              sessionId: sessionIdNum,
+              sessionId: sessionId, // Use sessionId directly as a string
               role: "assistant",
               content: responseData.message,
             },
@@ -195,7 +202,7 @@ Rules:
         if (responseData.component.jsxCode !== "// Component code not available") {
           const component = await prisma.component.create({
             data: {
-              sessionId: sessionIdNum,
+              sessionId: sessionId, // Use sessionId directly as a string
               name: responseData.component.name,
               jsxCode: responseData.component.jsxCode,
               cssCode: responseData.component.cssCode || "",

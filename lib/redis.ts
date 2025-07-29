@@ -2,25 +2,25 @@ import type { RedisClientType } from "redis"
 import { FallbackCache } from "./redis-fallback"
 
 // Only import Redis on server side
-let createClient: any = null
-const redisClient: RedisClientType | null = null
+let createClient: ((options?: any) => RedisClientType) | null = null
 
 // Check if we're on the server side
 const isServer = typeof window === "undefined"
 
 if (isServer) {
   try {
+    // Dynamically import 'redis' only on the server
     const redis = require("redis")
     createClient = redis.createClient
   } catch (error) {
-    console.warn("Redis not available, using fallback cache")
+    console.warn("Redis not available, using fallback cache:", error)
   }
 }
 
 class RedisManager {
   private static instance: RedisManager
   private client: RedisClientType | null = null
-  private isConnecting = false
+  private isConnecting = false // Not strictly needed with connectionPromise, but harmless
   private isAvailable = true
   private connectionPromise: Promise<RedisClientType | null> | null = null
 
@@ -37,7 +37,6 @@ class RedisManager {
     if (!isServer) return null
 
     const redisUrl = process.env.REDIS_URL
-
     if (!redisUrl) {
       console.warn("REDIS_URL not provided, using fallback cache")
       return null
@@ -97,7 +96,7 @@ class RedisManager {
       return this.connectionPromise
     }
 
-    // Return existing client if already connected
+    // Return existing client if already connected and open
     if (this.client && this.client.isOpen) {
       return this.client
     }
@@ -110,7 +109,7 @@ class RedisManager {
     // Create new connection promise
     this.connectionPromise = this.createConnection()
     const result = await this.connectionPromise
-    this.connectionPromise = null
+    this.connectionPromise = null // Clear the promise after it resolves or rejects
     return result
   }
 
@@ -126,11 +125,12 @@ class RedisManager {
         return null
       }
 
-      if (this.client) {
+      // If a client exists but is not open, try to quit it gracefully before creating a new one
+      if (this.client && !this.client.isOpen) {
         try {
           await this.client.quit()
         } catch (error) {
-          // Ignore quit errors
+          // Ignore quit errors if client was already in a bad state
         }
       }
 
@@ -143,20 +143,16 @@ class RedisManager {
           this.isAvailable = false
         }
       })
-
       this.client.on("connect", () => {
         console.log("Redis connected successfully")
         this.isAvailable = true
       })
-
       this.client.on("disconnect", () => {
         console.log("Redis disconnected")
       })
-
       this.client.on("reconnecting", () => {
         console.log("Redis reconnecting...")
       })
-
       this.client.on("end", () => {
         console.log("Redis connection ended")
       })
@@ -166,7 +162,6 @@ class RedisManager {
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error("Redis connection timeout")), 5000)
       })
-
       await Promise.race([connectPromise, timeoutPromise])
 
       return this.client
@@ -226,7 +221,6 @@ export class RedisCache {
     if (!isServer) {
       return await fallbackOperation()
     }
-
     try {
       const client = await connectRedis()
       if (client && client.isOpen) {
@@ -325,15 +319,12 @@ export class RedisCache {
 
   static async invalidateUserCache(userId: string) {
     if (!isServer) return false
-
     try {
       const patterns = [`session:${userId}`, `user_sessions:${userId}`]
-
       // Delete individual keys
       for (const pattern of patterns) {
         await this.del(pattern)
       }
-
       // Handle wildcard patterns for chat history
       const client = await connectRedis()
       if (client && client.isOpen) {
@@ -346,7 +337,6 @@ export class RedisCache {
           console.error("Error clearing chat history cache:", error)
         }
       }
-
       return true
     } catch (error) {
       console.error("Failed to invalidate user cache:", error)
@@ -362,7 +352,6 @@ if (isServer) {
     await disconnectRedis()
     process.exit(0)
   })
-
   process.on("SIGTERM", async () => {
     console.log("Shutting down Redis connection...")
     await disconnectRedis()

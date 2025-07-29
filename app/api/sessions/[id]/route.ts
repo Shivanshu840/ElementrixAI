@@ -11,7 +11,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const sessionId = Number.parseInt(params.id)
+    const sessionId = params.id
 
     // Check Redis cache first
     const cachedSession = await RedisCache.get(`session:${sessionId}`)
@@ -60,7 +60,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     const { title, description } = await request.json()
-    const sessionId = Number.parseInt(params.id)
+    const sessionId = params.id
 
     const updatedSession = await prisma.session.update({
       where: {
@@ -103,7 +103,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const sessionId = Number.parseInt(params.id)
+    const sessionId = params.id
 
     await prisma.session.delete({
       where: {
