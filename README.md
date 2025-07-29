@@ -1,4 +1,4 @@
-# Component Generator Platform
+# ElementrixAI
 
 A full-stack AI-powered platform for generating React components through conversational UI. Built with Next.js, TypeScript, Prisma, and **Google Gemini Flash**.
 
