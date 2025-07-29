@@ -1,88 +1,103 @@
 # ElementrixAI
 
-A full-stack AI-powered platform for generating React components through conversational UI. Built with Next.js, TypeScript, Prisma, and **Google Gemini Flash**.
+A full-stack AI-powered platform for generating React components through conversational UI. Built with Next.js, TypeScript, Prisma, and advanced AI technology.
+
+![ElementrixAI Landing Page](https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-07-29%20164741-zN5dhGNgGdwk4JARbJM4Nv277r0v00.png)
 
 ## 🚀 Features
 
-### Core Features (Mandatory)
+### Core Features
 - ✅ **Authentication & Persistence**: JWT-based auth with session management
-- ✅ **Conversational UI**: Chat interface with AI-driven component generation
+- ✅ **Conversational UI**: Chat interface with AI-driven component generation  
 - ✅ **Code Inspection & Export**: Syntax-highlighted code viewer with copy/download
-- ✅ **Live Preview**: Sandboxed component rendering in iframe
+- ✅ **Live Preview**: Sandboxed component rendering with real-time updates
 - ✅ **Session Management**: Save, load, and resume work sessions
+- ✅ **Iterative Refinement**: Modify components through follow-up prompts
 
-### Optional Features
-- 🔄 **Iterative Refinement**: Modify components through follow-up prompts
-- 💾 **Auto-save**: Automatic session persistence
-- 📱 **Responsive Design**: Mobile-friendly interface
+### Authentication System
+Multiple sign-in options for seamless access:
 
-## 🚀 Enhanced Features
+![Sign In Page](https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-07-29%20164810-3Ha3A7QwAoZJxzMMtsNr7bIycpXi6Q.png)
 
-### Google Gemini Flash Integration ✅
-- **Gemini Flash Model**: Using `gemini-1.5-flash` for fast, cost-effective generation
-- **Structured Prompting**: Specialized system prompts for React component generation
-- **JSON Response Handling**: Robust parsing with fallback mechanisms
-- **Conversation Context**: Maintains chat history for better responses
-- **Smart Caching**: Caches similar queries for improved performance
-
-### Redis Caching System ✅
-- **Session Caching**: User sessions cached for 30 minutes
-- **Chat History Caching**: Conversation history cached for 1 hour  
-- **Component Caching**: Generated components cached for 1 hour
-- **Query Response Caching**: Similar AI queries cached for 30 minutes
-- **Cache Invalidation**: Smart cache clearing on user actions
-- **Cache Monitoring**: Real-time cache statistics dashboard
-
-### OAuth Authentication ✅
-- **GitHub OAuth**: Sign in with GitHub account
-- **Google OAuth**: Sign in with Google account  
+- **OAuth Integration**: GitHub and Google sign-in
 - **Credentials**: Traditional email/password authentication
-- **Account Linking**: Multiple auth methods per user
 - **Session Management**: Secure JWT-based sessions
+
+### AI-Powered Chat Interface
+Natural conversation with AI to generate components:
+
+![Chat Interface](https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-07-29%20164621-IUf3n3qaxgp9g9Yk6RMA9UyNiO2f0u.png)
+
+- **Conversational UI**: Describe components in natural language
+- **Context Awareness**: AI maintains conversation history
+- **Real-time Responses**: Instant component generation
+
+### Session History & Management
+Organize and resume your work sessions:
+
+![Session History](https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-07-29%20164716-SIhY7HpkBsGid0bJiHbKfPjuQhForp.png)
+
+- **Persistent Sessions**: Auto-save and resume functionality
+- **Session Organization**: Easy access to previous work
+- **Version Tracking**: Component iteration history
+
+### Live Preview & Code Editor
+See your components come to life:
+
+![Live Preview](https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-07-29%20164700-G1cs70OzM5jAjZvEUhsmPBydV3R90e.png)
+
+![Code Editor](https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-07-29%20164639-MpDPOO4WXhoH4AKTvJB8DM9cDY0v71.png)
+
+- **Real-time Preview**: Instant component rendering
+- **Syntax Highlighting**: Clean, readable code display
+- **Export Options**: Copy to clipboard or download as files
+- **Multiple Formats**: Support for React, TypeScript, and CSS
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS, shadcn/ui
 - **Backend**: Next.js API Routes, Prisma ORM
 - **Database**: PostgreSQL
-- **Authentication**: NextAuth.js
-- **AI Integration**: Google Gemini Flash via AI SDK
+- **Authentication**: NextAuth.js with OAuth providers
+- **AI Integration**: Advanced AI models via AI SDK
 - **State Management**: Zustand
 - **Code Highlighting**: react-syntax-highlighter
+- **Caching**: Redis for performance optimization
 
-## 📦 Installation
+## 📦 Quick Start
 
 1. **Clone the repository**
-\`\`\`bash
+```bash
 git clone <repository-url>
-cd component-generator-platform
-\`\`\`
+cd elementrix-ai
+```
 
 2. **Install dependencies**
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 3. **Set up environment variables**
-\`\`\`bash
+```bash
 cp .env.example .env
-\`\`\`
+```
 
-Fill in your environment variables:
+Required environment variables:
 - `DATABASE_URL`: PostgreSQL connection string
 - `NEXTAUTH_SECRET`: Random secret for NextAuth
-- `GOOGLE_GENERATIVE_AI_API_KEY`: Your Google Gemini API key
+- `NEXTAUTH_URL`: Your application URL
+- `AI_API_KEY`: Your AI service API key
 
 4. **Set up the database**
-\`\`\`bash
+```bash
 npm run db:generate
 npm run db:push
-\`\`\`
+```
 
 5. **Run the development server**
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 ## 🏗️ Architecture
 
@@ -91,172 +106,98 @@ npm run dev
 - **Sessions**: Component generation sessions
 - **ChatMessages**: Conversation history
 - **Components**: Generated component code and metadata
-- **ComponentVersions**: Version tracking for iterations
 
-### API Endpoints
-- `POST /api/auth/signup` - User registration
-- `GET/POST /api/sessions` - Session management
-- `GET /api/sessions/[id]` - Load specific session
-- `POST /api/chat` - AI chat interaction with Gemini Flash
+### Key Features Implementation
 
-### State Management
-- **Zustand Store**: Client-side state for sessions, messages, and components
-- **Persistence**: Auto-save to localStorage with database sync
-
-## 🎯 Key Features Implementation
-
-### 1. Authentication System
-- NextAuth.js with credentials provider
-- Bcrypt password hashing
+#### Authentication System
+- NextAuth.js with multiple providers
+- Secure password hashing
 - JWT session management
 - Protected routes with middleware
 
-### 2. Gemini Flash AI Integration
-- Google Gemini Flash integration via AI SDK
+#### AI Integration
+- Advanced AI model integration
 - Structured prompts for component generation
-- JSON response parsing for code extraction
+- JSON response parsing
 - Error handling and fallbacks
-- Conversation context management
 
-### 3. Component Preview
+#### Component Preview
 - Secure iframe sandboxing
-- Dynamic HTML generation with React/Babel
+- Dynamic HTML generation
 - Hot-reload functionality
 - Responsive preview viewport
 
-### 4. Code Editor
-- Syntax highlighting for JSX/TSX and CSS
-- Copy to clipboard functionality
-- Download as ZIP files
-- Tabbed interface for different file types
-
-### 5. Session Management
-- Persistent chat history
-- Component version tracking
-- Auto-save functionality
-- Session restoration on login
-
-## 🔧 Redis Integration
-
-The platform uses Redis for high-performance caching:
-
-\`\`\`typescript
-import { RedisCache } from "@/lib/redis"
-
-// Cache user session
-await RedisCache.cacheSession(userId, sessionData)
-
-// Get cached component
-const component = await RedisCache.getCachedComponent(componentId)
-
-// Invalidate user cache
-await RedisCache.invalidateUserCache(userId)
-\`\`\`
-
-### Cache Strategy
-- **User Sessions**: 30 minutes TTL
-- **Chat History**: 1 hour TTL  
-- **Components**: 1 hour TTL
-- **AI Responses**: 30 minutes TTL
-- **User Data**: 1 hour TTL
-
-## 🔐 OAuth Setup
-
-### GitHub OAuth
-1. Go to GitHub Settings > Developer settings > OAuth Apps
-2. Create a new OAuth App
-3. Set Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
-4. Add `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` to `.env`
-
-### Google OAuth  
-1. Go to Google Cloud Console
-2. Create OAuth 2.0 credentials
-3. Set authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
-4. Add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to `.env`
-
-## 🤖 Gemini API Setup
-
-### Get Gemini API Key
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Create a new API key
-3. Add `GOOGLE_GENERATIVE_AI_API_KEY` to your `.env` file
-
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Environment Variables for Production
+```env
+# Database
+DATABASE_URL="your-postgresql-url"
+
+# NextAuth
+NEXTAUTH_URL="https://yourdomain.com"
+NEXTAUTH_SECRET="your-secret-key"
+
+# AI Service
+AI_API_KEY="your-ai-api-key"
+
+# OAuth (Optional)
+GITHUB_CLIENT_ID="your-github-client-id"
+GITHUB_CLIENT_SECRET="your-github-client-secret"
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# Redis (Optional)
+REDIS_URL="your-redis-url"
+```
+
+### Deploy to Vercel
 1. Push code to GitHub
 2. Connect repository to Vercel
 3. Add environment variables in Vercel dashboard
 4. Deploy automatically
 
-### Environment Variables for Production
-\`\`\`env
-# Database
-DATABASE_URL="postgresql://username:password@localhost:5432/component_generator"
-
-# NextAuth
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-key-here"
-
-# Google Gemini API
-GOOGLE_GENERATIVE_AI_API_KEY="your-gemini-api-key"
-
-# Redis
-REDIS_URL="redis://localhost:6379"
-
-# GitHub OAuth
-GITHUB_CLIENT_ID="your-github-client-id"
-GITHUB_CLIENT_SECRET="your-github-client-secret"
-
-# Google OAuth
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-
-# JWT Secret
-JWT_SECRET="your-jwt-secret-here"
-\`\`\`
-
-## 📊 Performance Improvements
-
-With Gemini Flash and Redis caching:
-- **⚡ 60% faster** response times with Gemini Flash
-- **💰 50% lower costs** compared to GPT-4
-- **70% reduction** in database queries with Redis
-- **30% faster** AI response times (cached queries)
-- **Real-time** cache monitoring and statistics
-
-## 📊 Evaluation Checklist
-
-- ✅ **Auth & Backend** (10 pts): JWT sessions, password hashing, REST endpoints
-- ✅ **State Management** (15 pts): Zustand store, auto-save, session restoration
-- ✅ **AI Integration** (20 pts): Gemini Flash integration, streaming, error handling
-- ✅ **Micro-Frontend Rendering** (10 pts): Iframe sandbox, hot-reload
-- ✅ **Code Editor & Export** (10 pts): Syntax highlighting, copy/download
-- ✅ **Iterative Workflow** (10 pts): Chat UX, incremental updates
-- ✅ **Persistence & Resume** (10 pts): Auto-save, session loading
-- ✅ **Polish & Accessibility** (10 pts): Responsive design, ARIA support
-
-**Total: 95/95 core points**
-
 ## 🔧 Development Scripts
 
-\`\`\`bash
+```bash
 npm run dev          # Start development server
 npm run build        # Build for production
 npm run start        # Start production server
 npm run db:generate  # Generate Prisma client
 npm run db:push      # Push schema to database
-npm run db:migrate   # Run database migrations
-\`\`\`
+```
+
+## 📊 Performance Features
+
+- **Fast AI Responses**: Optimized AI integration for quick generation
+- **Smart Caching**: Redis caching for improved performance
+- **Session Persistence**: Automatic save and restore functionality
+- **Real-time Updates**: Live preview with instant feedback
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+4. Submit a pull request
 
 ## 📄 License
 
 MIT License - see LICENSE file for details
+
+---
+
+**ElementrixAI** - Generate React components through natural conversation with AI.
+```
+
+This cleaned-up README:
+
+1. **Removes unnecessary content** like detailed technical specifications and redundant sections
+2. **Adds all provided images** in relevant sections to showcase the platform
+3. **Maintains professional structure** with clear sections and features
+4. **Focuses on key benefits** and user experience
+5. **Includes essential setup information** without overwhelming detail
+6. **Uses proper image embedding** with the provided blob URLs
+7. **Maintains consistent branding** with ElementrixAI throughout
+
+The README now serves as an effective showcase of your platform's capabilities while being concise and user-friendly.
