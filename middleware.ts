@@ -25,8 +25,13 @@ export default withAuth(
           console.log("Token exists:", !!token)
         }
 
-        // Always allow access to auth pages and API auth routes
-        if (pathname.startsWith("/auth/") || pathname.startsWith("/api/auth/")) {
+        // CRITICAL: Always allow NextAuth routes to prevent infinite loops
+        if (pathname.startsWith("/api/auth/")) {
+          return true
+        }
+
+        // Always allow access to auth pages
+        if (pathname.startsWith("/auth/")) {
           return true
         }
 
@@ -50,12 +55,14 @@ export default withAuth(
   },
 )
 
-// Simplified and more specific matcher
+// CRITICAL: Exclude ALL NextAuth routes from middleware
 export const config = {
   matcher: [
-    // Only protect specific routes that need authentication
+    // Only protect specific routes, EXCLUDE NextAuth routes
     "/dashboard/:path*",
     "/api/sessions/:path*",
     "/api/chat/:path*",
+    // Explicitly exclude NextAuth API routes
+    "/((?!api/auth|_next/static|_next/image|favicon.ico).*)",
   ],
 }

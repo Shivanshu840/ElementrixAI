@@ -128,7 +128,9 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ user, account, profile }) {
       try {
+        // For OAuth providers, ensure user exists in database
         if (account?.provider !== "credentials" && user.email) {
+          // Check if user exists in database
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
           })
@@ -139,7 +141,7 @@ export const authOptions: NextAuthOptions = {
               data: {
                 email: user.email,
                 name: user.name || "",
-                provider: account?.provider ,
+                provider: account?.provider,
               },
             })
           }
@@ -162,11 +164,33 @@ export const authOptions: NextAuthOptions = {
       }
       return true
     },
+    // CRITICAL: Simplified redirect callback to prevent loops
     async redirect({ url, baseUrl }) {
-      // Ensure redirects stay within the same domain
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      if (new URL(url).origin === baseUrl) return url
-      return baseUrl
+      console.log("Redirect callback - URL:", url, "BaseURL:", baseUrl)
+
+      // If it's a relative URL, make it absolute
+      if (url.startsWith("/")) {
+        const redirectUrl = `${baseUrl}${url}`
+        console.log("Redirecting to:", redirectUrl)
+        return redirectUrl
+      }
+
+      // If it's an absolute URL on the same origin, allow it
+      try {
+        const urlObj = new URL(url)
+        const baseUrlObj = new URL(baseUrl)
+        if (urlObj.origin === baseUrlObj.origin) {
+          console.log("Same origin redirect to:", url)
+          return url
+        }
+      } catch (error) {
+        console.error("Invalid URL in redirect:", error)
+      }
+
+      // Default to dashboard
+      const defaultUrl = `${baseUrl}/dashboard`
+      console.log("Default redirect to:", defaultUrl)
+      return defaultUrl
     },
   },
   events: {
@@ -186,7 +210,7 @@ export const authOptions: NextAuthOptions = {
     signUp: "/auth/signup",
     error: "/auth/error",
   },
-  // Add these for production stability
+  // Production-specific settings
   useSecureCookies: process.env.NODE_ENV === "production",
   cookies: {
     sessionToken: {
@@ -199,4 +223,6 @@ export const authOptions: NextAuthOptions = {
       },
     },
   },
+  // Add debug logging in development
+  debug: process.env.NODE_ENV === "development",
 }

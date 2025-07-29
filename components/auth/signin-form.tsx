@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { useState, useEffect } from "react"
+import { signIn, getSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,9 +23,32 @@ export function SignInForm() {
   // Get the callback URL from search params or default to dashboard
   const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard"
 
+  // Prevent multiple simultaneous sign-in attempts
+  const [isSigningIn, setIsSigningIn] = useState(false)
+
+  useEffect(() => {
+    // Check if user is already signed in
+    const checkSession = async () => {
+      const session = await getSession()
+      if (session) {
+        console.log("User already signed in, redirecting...")
+        router.replace(callbackUrl)
+      }
+    }
+    checkSession()
+  }, [callbackUrl, router])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Prevent multiple submissions
+    if (isSigningIn || isLoading) {
+      console.log("Sign in already in progress, ignoring...")
+      return
+    }
+
     setIsLoading(true)
+    setIsSigningIn(true)
     setError("")
 
     try {
@@ -34,14 +57,35 @@ export function SignInForm() {
       const result = await signIn("credentials", {
         email,
         password,
-        callbackUrl,
-        redirect: true, // Let NextAuth handle the redirect
+        redirect: false, // Handle redirect manually to prevent loops
       })
 
-      // If we reach here, there was an error (redirect: true should redirect on success)
+      console.log("Sign in result:", result)
+
       if (result?.error) {
         console.error("Sign in error:", result.error)
         setError("Invalid credentials")
+      } else if (result?.ok) {
+        console.log("Sign in successful")
+
+        // Wait for session to be established
+        let attempts = 0
+        const maxAttempts = 10
+
+        while (attempts < maxAttempts) {
+          const session = await getSession()
+          if (session) {
+            console.log("Session established, redirecting to:", callbackUrl)
+            router.replace(callbackUrl)
+            return
+          }
+          attempts++
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        }
+
+        // Fallback if session check fails
+        console.log("Session check timeout, redirecting anyway")
+        router.replace(callbackUrl)
       } else {
         setError("An unexpected error occurred. Please try again.")
       }
@@ -50,40 +94,45 @@ export function SignInForm() {
       setError("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
+      setIsSigningIn(false)
     }
   }
 
-  const handleGitHubSignIn = async () => {
-    setIsLoading(true)
-    setError("")
-
-    try {
-      console.log("Attempting GitHub sign in...")
-      await signIn("github", {
-        callbackUrl,
-        redirect: true,
-      })
-    } catch (error) {
-      console.error("GitHub sign in error:", error)
-      setError("Failed to sign in with GitHub. Please try again.")
-      setIsLoading(false)
+  const handleOAuthSignIn = async (provider: string) => {
+    // Prevent multiple OAuth attempts
+    if (isSigningIn || isLoading) {
+      console.log("OAuth sign in already in progress, ignoring...")
+      return
     }
-  }
 
-  const handleGoogleSignIn = async () => {
     setIsLoading(true)
+    setIsSigningIn(true)
     setError("")
 
     try {
-      console.log("Attempting Google sign in...")
-      await signIn("google", {
+      console.log(`Attempting ${provider} sign in...`)
+
+      // Use redirect: false to prevent automatic redirects that might cause loops
+      const result = await signIn(provider, {
         callbackUrl,
-        redirect: true,
+        redirect: false,
       })
+
+      if (result?.error) {
+        console.error(`${provider} sign in error:`, result.error)
+        setError(`Failed to sign in with ${provider}. Please try again.`)
+        setIsLoading(false)
+        setIsSigningIn(false)
+      } else if (result?.url) {
+        // Manually redirect to the callback URL
+        console.log(`${provider} sign in initiated, redirecting to:`, result.url)
+        window.location.href = result.url
+      }
     } catch (error) {
-      console.error("Google sign in error:", error)
-      setError("Failed to sign in with Google. Please try again.")
+      console.error(`${provider} sign in error:`, error)
+      setError(`Failed to sign in with ${provider}. Please try again.`)
       setIsLoading(false)
+      setIsSigningIn(false)
     }
   }
 
@@ -125,7 +174,7 @@ export function SignInForm() {
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading || isSigningIn}>
             {isLoading ? "Signing in..." : "Sign In"}
           </Button>
 
@@ -139,12 +188,22 @@ export function SignInForm() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" type="button" disabled={isLoading} onClick={handleGitHubSignIn}>
+            <Button
+              variant="outline"
+              type="button"
+              disabled={isLoading || isSigningIn}
+              onClick={() => handleOAuthSignIn("github")}
+            >
               <Github className="mr-2 h-4 w-4" />
               GitHub
             </Button>
 
-            <Button variant="outline" type="button" disabled={isLoading} onClick={handleGoogleSignIn}>
+            <Button
+              variant="outline"
+              type="button"
+              disabled={isLoading || isSigningIn}
+              onClick={() => handleOAuthSignIn("google")}
+            >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
                   fill="currentColor"
