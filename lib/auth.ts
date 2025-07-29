@@ -2,15 +2,11 @@ import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GitHubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
-// Removed the Prisma adapter import
-// import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "./prisma"
 import { RedisCache } from "./redis"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
-  // Removed the adapter line
-  // adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -86,6 +82,10 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
     async jwt({ token, user, account }) {
@@ -128,8 +128,23 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ user, account, profile }) {
       try {
-        // Cache OAuth user data
         if (account?.provider !== "credentials" && user.email) {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          })
+
+          if (!existingUser) {
+            // Create new user for OAuth
+            await prisma.user.create({
+              data: {
+                email: user.email,
+                name: user.name || "",
+                provider: account?.provider ,
+              },
+            })
+          }
+
+          // Cache OAuth user data
           await RedisCache.set(
             `user:${user.email}`,
             {
@@ -142,9 +157,16 @@ export const authOptions: NextAuthOptions = {
           )
         }
       } catch (error) {
-        console.error("Failed to cache user data on sign in:", error)
+        console.error("Failed to handle sign in:", error)
+        return false
       }
       return true
+    },
+    async redirect({ url, baseUrl }) {
+      // Ensure redirects stay within the same domain
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     },
   },
   events: {
@@ -162,5 +184,19 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
     signUp: "/auth/signup",
+    error: "/auth/error",
+  },
+  // Add these for production stability
+  useSecureCookies: process.env.NODE_ENV === "production",
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
   },
 }

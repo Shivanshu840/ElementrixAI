@@ -3,13 +3,15 @@ import { NextResponse } from "next/server"
 
 export default withAuth(
   function middleware(req) {
+    const { pathname } = req.nextUrl
+
     // Add debugging in development
     if (process.env.NODE_ENV === "development") {
-      console.log("Middleware triggered for:", req.nextUrl.pathname)
+      console.log("Middleware triggered for:", pathname)
       console.log("Has token:", !!req.nextauth.token)
     }
 
-    // Allow the request to continue if authorized
+    // Allow the request to continue
     return NextResponse.next()
   },
   {
@@ -23,8 +25,8 @@ export default withAuth(
           console.log("Token exists:", !!token)
         }
 
-        // Always allow access to auth pages
-        if (pathname.startsWith("/auth/")) {
+        // Always allow access to auth pages and API auth routes
+        if (pathname.startsWith("/auth/") || pathname.startsWith("/api/auth/")) {
           return true
         }
 
@@ -48,13 +50,12 @@ export default withAuth(
   },
 )
 
+// Simplified and more specific matcher
 export const config = {
   matcher: [
-    // Protect these specific routes
+    // Only protect specific routes that need authentication
     "/dashboard/:path*",
     "/api/sessions/:path*",
     "/api/chat/:path*",
-    // Don't run middleware on these paths
-    "/((?!_next/static|_next/image|favicon.ico|auth/signin|auth/signup|auth/error).*)",
   ],
 }

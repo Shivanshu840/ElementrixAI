@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
-import { signIn, getSession } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -34,31 +34,14 @@ export function SignInForm() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false,
+        callbackUrl,
+        redirect: true, // Let NextAuth handle the redirect
       })
 
-      console.log("Sign in result:", result)
-
+      // If we reach here, there was an error (redirect: true should redirect on success)
       if (result?.error) {
         console.error("Sign in error:", result.error)
         setError("Invalid credentials")
-      } else if (result?.ok) {
-        console.log("Sign in successful, redirecting to:", callbackUrl)
-
-        // Wait a moment for the session to be established
-        await new Promise((resolve) => setTimeout(resolve, 100))
-
-        // Verify session was created
-        const session = await getSession()
-        console.log("Session after sign in:", session)
-
-        if (session) {
-          // Use window.location for a hard redirect to avoid middleware issues
-          window.location.href = callbackUrl
-        } else {
-          // Fallback to router.push if window.location doesn't work
-          router.push(callbackUrl)
-        }
       } else {
         setError("An unexpected error occurred. Please try again.")
       }
@@ -76,7 +59,10 @@ export function SignInForm() {
 
     try {
       console.log("Attempting GitHub sign in...")
-      await signIn("github", { callbackUrl })
+      await signIn("github", {
+        callbackUrl,
+        redirect: true,
+      })
     } catch (error) {
       console.error("GitHub sign in error:", error)
       setError("Failed to sign in with GitHub. Please try again.")
@@ -90,7 +76,10 @@ export function SignInForm() {
 
     try {
       console.log("Attempting Google sign in...")
-      await signIn("google", { callbackUrl })
+      await signIn("google", {
+        callbackUrl,
+        redirect: true,
+      })
     } catch (error) {
       console.error("Google sign in error:", error)
       setError("Failed to sign in with Google. Please try again.")

@@ -47,7 +47,7 @@ export default function DashboardPage() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
-              <h1 className="text-lg font-semibold text-foreground">Component Studio</h1>
+              <h1 className="text-lg font-semibold text-foreground">ElementrixAI</h1>
             </div>
             <Separator orientation="vertical" className="h-6" />
             <Badge variant="secondary" className="text-xs font-medium">
@@ -72,7 +72,7 @@ export default function DashboardPage() {
                 <div className="h-12 border-b border-border/50 flex items-center px-4 bg-slate-50/50">
                   <div className="flex items-center gap-2">
                     <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium text-foreground">Sessions</span>
+                    <span className="text-sm font-medium text-foreground">History</span>
                   </div>
                 </div>
                 <div className="h-[calc(100%-3rem)] overflow-hidden">
@@ -92,9 +92,9 @@ export default function DashboardPage() {
                     <div className="h-12 border-b border-border/50 flex items-center px-4 bg-slate-50/50">
                       <div className="flex items-center gap-2">
                         <MessageSquare className="h-4 w-4 text-green-500" />
-                        <span className="text-sm font-medium text-foreground">AI Assistant</span>
+                        <span className="text-sm font-medium text-foreground">Elementrix Assistant</span>
                         <Badge variant="outline" className="text-xs ml-auto">
-                          Gemini Flash
+                          Elementrix Flash
                         </Badge>
                       </div>
                     </div>

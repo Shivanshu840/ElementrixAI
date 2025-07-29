@@ -80,7 +80,7 @@ export function SessionSidebar() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Folder className="h-5 w-5 text-blue-500" />
-              <CardTitle className="text-lg">Sessions</CardTitle>
+              <CardTitle className="text-lg">History</CardTitle>
             </div>
           </div>
         </CardHeader>
@@ -100,7 +100,7 @@ export function SessionSidebar() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Folder className="h-5 w-5 text-blue-500" />
-            <CardTitle className="text-lg">Sessions</CardTitle>
+            <CardTitle className="text-lg">History</CardTitle>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setIsCreating(true)} className="h-8 w-8 p-0">
             <Plus className="h-4 w-4" />
@@ -159,7 +159,7 @@ export function SessionSidebar() {
             {sessions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No sessions yet</p>
+                <p className="text-sm">No History yet</p>
                 <p className="text-xs">Create one to get started</p>
               </div>
             ) : (

@@ -132,7 +132,7 @@ export function ChatPanel() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-green-500" />
-              <CardTitle className="text-lg">AI Assistant</CardTitle>
+              <CardTitle className="text-lg">Elementrix Assistant</CardTitle>
             </div>
           </div>
         </CardHeader>
@@ -160,13 +160,13 @@ export function ChatPanel() {
             </div>
             <Badge variant="secondary" className="text-xs flex items-center gap-1">
               <Zap className="h-3 w-3" />
-              Gemini Flash
+              Elementrix Flash
             </Badge>
           </div>
         </div>
 
         {currentSession && (
-          <p className="text-sm text-muted-foreground mt-2">Session: {currentSession.title || currentSession.id}</p>
+          <p className="text-sm text-muted-foreground mt-2">History: {currentSession.title || currentSession.id}</p>
         )}
 
         {error && (
@@ -243,7 +243,7 @@ export function ChatPanel() {
                   {message.role === "assistant" && (
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant="secondary" className="text-xs">
-                        AI Assistant
+                        Elementrix Assistant
                       </Badge>
                     </div>
                   )}
