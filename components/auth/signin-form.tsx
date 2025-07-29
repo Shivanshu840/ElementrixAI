@@ -1,10 +1,9 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { signIn, getSession } from "next-auth/react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,6 +18,10 @@ export function SignInForm() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Get the callback URL from search params or default to dashboard
+  const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,20 +29,71 @@ export function SignInForm() {
     setError("")
 
     try {
+      console.log("Attempting sign in with credentials...")
+
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       })
 
+      console.log("Sign in result:", result)
+
       if (result?.error) {
+        console.error("Sign in error:", result.error)
         setError("Invalid credentials")
+      } else if (result?.ok) {
+        console.log("Sign in successful, redirecting to:", callbackUrl)
+
+        // Wait a moment for the session to be established
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        // Verify session was created
+        const session = await getSession()
+        console.log("Session after sign in:", session)
+
+        if (session) {
+          // Use window.location for a hard redirect to avoid middleware issues
+          window.location.href = callbackUrl
+        } else {
+          // Fallback to router.push if window.location doesn't work
+          router.push(callbackUrl)
+        }
       } else {
-        router.push("/dashboard")
+        setError("An unexpected error occurred. Please try again.")
       }
     } catch (error) {
+      console.error("Sign in exception:", error)
       setError("An error occurred. Please try again.")
     } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGitHubSignIn = async () => {
+    setIsLoading(true)
+    setError("")
+
+    try {
+      console.log("Attempting GitHub sign in...")
+      await signIn("github", { callbackUrl })
+    } catch (error) {
+      console.error("GitHub sign in error:", error)
+      setError("Failed to sign in with GitHub. Please try again.")
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true)
+    setError("")
+
+    try {
+      console.log("Attempting Google sign in...")
+      await signIn("google", { callbackUrl })
+    } catch (error) {
+      console.error("Google sign in error:", error)
+      setError("Failed to sign in with Google. Please try again.")
       setIsLoading(false)
     }
   }
@@ -60,7 +114,14 @@ export function SignInForm() {
 
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+              required
+            />
           </div>
 
           <div className="space-y-2">
@@ -70,6 +131,7 @@ export function SignInForm() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
               required
             />
           </div>
@@ -88,21 +150,12 @@ export function SignInForm() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button
-              variant="outline"
-              type="button"
-              disabled={isLoading}
-              onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
-            >
+            <Button variant="outline" type="button" disabled={isLoading} onClick={handleGitHubSignIn}>
               <Github className="mr-2 h-4 w-4" />
               GitHub
             </Button>
-            <Button
-              variant="outline"
-              type="button"
-              disabled={isLoading}
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-            >
+
+            <Button variant="outline" type="button" disabled={isLoading} onClick={handleGoogleSignIn}>
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
                   fill="currentColor"
