@@ -11,7 +11,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Code className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold">Component Generator</h1>
+            <h1 className="text-2xl font-bold">Elementrix AI</h1>
             <div className="flex items-center gap-1 bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
               <Sparkles className="h-3 w-3" />
               Powered by Gemini
